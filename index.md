@@ -1,6 +1,6 @@
 ---
 layout: home
-title: Desafiando la Nube: 365 Días de AWS
+title: "Desafiando la Nube: 365 Días de AWS"
 ---
 
 # ☁️ AWS Daily Insights
