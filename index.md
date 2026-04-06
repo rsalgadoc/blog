@@ -1,9 +1,10 @@
 ---
-layout: default
-title: "Desafiando la Nube: 365 Días de AWS"
+layout: home
+author_profile: true
+title: "☁️ AWS Daily Insights"
 ---
 
-# ☁️ AWS Daily Insights
+
 **Arquitectura, Automatización y Mejores Prácticas en la Nube.**
 
 ¡Hola! Soy Rodrigo Salgado, y he decidido documentar mi camino hacia la maestría en **Amazon Web Services**. Mi objetivo es claro: **un post nuevo cada día** compartiendo soluciones reales, scripts listos para producción y arquitecturas escalables.
