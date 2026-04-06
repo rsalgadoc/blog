@@ -37,4 +37,4 @@ Aquí aparecerán mis posts más recientes. ¡Vuelve mañana para el siguiente!
 
 ### 🔗 Conecta conmigo
 ¿Tienes alguna duda sobre un servicio específico de AWS? 
-[LinkedIn](www.linkedin.com/in/rodrigo-salgado-cordova) | [GitHub]((https://github.com/rsalgadoc)) | [Certificaciones](https://www.credly.com/users/rodrigo-salgado-cordova)
+[LinkedIn](www.linkedin.com/in/rodrigo-salgado-cordova) | [GitHub](https://github.com/rsalgadoc) | [Certificaciones](https://www.credly.com/users/rodrigo-salgado-cordova)
