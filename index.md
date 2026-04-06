@@ -1,5 +1,5 @@
 ---
-layout: home
+layout: default
 title: "Desafiando la Nube: 365 Días de AWS"
 ---
 
