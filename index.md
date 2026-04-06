@@ -28,7 +28,7 @@ Aquí aparecerán mis posts más recientes. ¡Vuelve mañana para el siguiente!
 <ul>
   {% for post in site.posts limit:5 %}
     <li>
-      <a href="{{ post.url }}">{{ post.date | date: "%Y-%m-%d" }} - {{ post.title }}</a>
+      <a href="{{ post.url | relative_url }}">{{ post.date | date: "%Y-%m-%d" }} - {{ post.title }}</a>
       <p>{{ post.excerpt | strip_html | truncatewords: 20 }}</p>
     </li>
   {% endfor %}
