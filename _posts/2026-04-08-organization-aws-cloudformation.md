@@ -1,6 +1,6 @@
 ---
 title: "Día 1: Automatizando mi Organización de AWS con CloudFormation"
-date: 2026-04-07
+date: 2026-04-08
 tags: 
   - AWS
   - CloudFormation
@@ -136,19 +136,29 @@ Resources:
       TargetIds:
         - !GetAtt Organization.RootId
 
-  # SCP 2: Restringir regiones (solo permite las que tú uses)
+  # SCP 2 Corregido: Restringir regiones permitiendo servicios globales
   RestrictRegionsSCP:
     Type: AWS::Organizations::Policy
     Properties:
       Name: Restrict-Regions
-      Description: Solo permite usar regiones aprobadas (us-east-1 y sa-east-1)
+      Description: Permite regiones aprobadas y servicios globales esenciales
       Type: SERVICE_CONTROL_POLICY
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Sid: DenyUnsupportedRegions
             Effect: Deny
-            Action: "*"
+            NotAction:
+              # Lista de servicios que NO deben ser bloqueados (servicios globales)
+              - iam:*
+              - organizations:*
+              - route53:*
+              - budgets:*
+              - waf:*
+              - cloudfront:*
+              - globalaccelerator:*
+              - support:*
+              - trustedadvisor:*
             Resource: "*"
             Condition:
               StringNotEquals:
