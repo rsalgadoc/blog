@@ -8,6 +8,8 @@ Resources:
     Type: AWS::Organizations::Organization
     Properties:
       FeatureSet: ALL_FEATURES
+      EnabledPolicyTypes: 
+        - SERVICE_CONTROL_POLICY # <--- CRÍTICO para que funcionen las SCPs
 
   # 2. Organizational Units (OUs)
   SecurityOU:
@@ -56,6 +58,25 @@ Resources:
         - !Ref SecurityOU
       RoleName: OrganizationAccountAccessRole
 
+  # Cuenta para centralizar Redes (Transit Gateway, Shared VPC, VPN)
+  NetworkHubAccount:
+    Type: AWS::Organizations::Account
+    Properties:
+      AccountName: network-hub
+      Email: network-hub@tu-dominio.com # Cambia esto
+      ParentIds: 
+        - !Ref InfrastructureOU
+      RoleName: OrganizationAccountAccessRole
+
+  SharedServicesAccount:
+    Type: AWS::Organizations::Account
+    Properties:
+      AccountName: shared-services
+      Email: shared-services@tu-dominio.com
+      ParentIds: 
+        - !Ref InfrastructureOU
+      RoleName: OrganizationAccountAccessRole
+
   SandboxAccount:
     Type: AWS::Organizations::Account
     Properties:
@@ -63,6 +84,7 @@ Resources:
       Email: sandbox@tu-dominio.com
       ParentIds: 
         - !Ref SandboxOU
+      RoleName: OrganizationAccountAccessRole
 
   DevAccount:
     Type: AWS::Organizations::Account
@@ -71,6 +93,7 @@ Resources:
       Email: dev@tu-dominio.com
       ParentIds: 
         - !Ref DevOU
+      RoleName: OrganizationAccountAccessRole
 
   ProdAccount:
     Type: AWS::Organizations::Account
@@ -79,6 +102,7 @@ Resources:
       Email: prod@tu-dominio.com
       ParentIds: 
         - !Ref ProdOU
+      RoleName: OrganizationAccountAccessRole
 
   # 4. SCPs recomendados (adjuntados al Root o a OUs específicas)
 
@@ -125,6 +149,10 @@ Resources:
               - globalaccelerator:*
               - support:*
               - trustedadvisor:*
+              - sts:*          # <--- AGREGADO
+              - sso:*          # <--- AGREGADO
+              - ce:*           # <--- AGREGADO
+              - chatbot:*      # <--- Útil para alertas en Slack/Teams
             Resource: "*"
             Condition:
               StringNotEquals:
