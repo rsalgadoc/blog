@@ -69,5 +69,5 @@ Mira el proceso paso a paso en video:
 
 ### 💡 Próximos pasos
 - Agregar un grupo de seguridad para controlar el tráfico
-- Configurar variables de entorno
-- Escalar a múltiples instancias
+- IP Estática en la Nube
+- Parameters, Plantillas Reutilizables

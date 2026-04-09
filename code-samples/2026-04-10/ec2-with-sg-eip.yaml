@@ -1,0 +1,121 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: EC2 Instance con Elastic IP y Security Groups en VPC
+
+Parameters:
+  Environment:
+    Description: Entorno (dev, test, prod)
+    Type: String
+    Default: dev
+    AllowedValues: [dev, test, prod]
+
+  SecurityGroupDescription:
+    Description: Descripción del Security Group del servidor
+    Type: String
+    Default: "Security group for the web/application server"
+
+  SSHAllowedCIDR:
+    Description: CIDR desde donde se permite SSH (recomendado restringirlo)
+    Type: String
+    Default: "0.0.0.0/0"   # Cambia esto a tu IP pública /32 en producción
+
+  VpcId:
+    Description: ID de la VPC donde se desplegará la instancia
+    Type: AWS::EC2::VPC::Id
+
+  SubnetId:
+    Description: ID de la Subnet pública donde se lanzará la instancia
+    Type: AWS::EC2::Subnet::Id
+
+  ImageId:
+    Description: AMI ID (Linux)
+    Type: String
+    Default: "ami-0ea87431b78a82070"   # Asegúrate que sea válida en us-east-1
+
+Resources:
+  # Security Group para SSH
+  SSHSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref SSHAllowedCIDR
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-SSH-SG"
+
+  # Security Group para el servidor (HTTP + SSH restringido)
+  ServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Ref SecurityGroupDescription
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-Server-SG"
+
+  # Instancia EC2
+  MyInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImageId
+      InstanceType: t3.micro
+      SubnetId: !Ref SubnetId
+      SecurityGroupIds:
+        - !Ref SSHSecurityGroup
+        - !Ref ServerSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-MyInstance"
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 8
+            VolumeType: gp3
+            DeleteOnTermination: true
+    DependsOn: MyEIP   # Asegura orden correcto
+
+  # Elastic IP (en VPC)
+  MyEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-MyEIP"
+
+  # Asociación del Elastic IP a la instancia
+  MyEIPAssociation:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      AllocationId: !GetAtt MyEIP.AllocationId
+      InstanceId: !Ref MyInstance
+
+Outputs:
+  InstanceId:
+    Description: ID de la instancia EC2
+    Value: !Ref MyInstance
+
+  PublicIPAddress:
+    Description: Elastic IP asignada a la instancia
+    Value: !Ref MyEIP
+
+  ElasticIP:
+    Description: Elastic IP Value
+    Value: !GetAtt MyEIP.AllocationId
+
+  SSHSecurityGroupId:
+    Description: Security Group ID para SSH
+    Value: !Ref SSHSecurityGroup
+
+  ServerSecurityGroupId:
+    Description: Security Group ID del servidor
+    Value: !Ref ServerSecurityGroup
