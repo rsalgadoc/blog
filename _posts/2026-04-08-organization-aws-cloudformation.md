@@ -41,7 +41,7 @@ Resources:
   Organization:
     Type: AWS::Organizations::Organization
     Properties:
-      FeatureSet: ALL_FEATURES
+      FeatureSet: ALL
 
   # 2. Organizational Units (OUs)
   SecurityOU:
@@ -90,6 +90,25 @@ Resources:
         - !Ref SecurityOU
       RoleName: OrganizationAccountAccessRole
 
+  # Cuenta para centralizar Redes (Transit Gateway, Shared VPC, VPN)
+  NetworkHubAccount:
+    Type: AWS::Organizations::Account
+    Properties:
+      AccountName: network-hub
+      Email: network-hub@tu-dominio.com # Cambia esto
+      ParentIds: 
+        - !Ref InfrastructureOU
+      RoleName: OrganizationAccountAccessRole
+
+  SharedServicesAccount:
+    Type: AWS::Organizations::Account
+    Properties:
+      AccountName: shared-services
+      Email: shared-services@tu-dominio.com
+      ParentIds: 
+        - !Ref InfrastructureOU
+      RoleName: OrganizationAccountAccessRole
+
   SandboxAccount:
     Type: AWS::Organizations::Account
     Properties:
@@ -97,6 +116,7 @@ Resources:
       Email: sandbox@tu-dominio.com
       ParentIds: 
         - !Ref SandboxOU
+      RoleName: OrganizationAccountAccessRole
 
   DevAccount:
     Type: AWS::Organizations::Account
@@ -105,6 +125,7 @@ Resources:
       Email: dev@tu-dominio.com
       ParentIds: 
         - !Ref DevOU
+      RoleName: OrganizationAccountAccessRole
 
   ProdAccount:
     Type: AWS::Organizations::Account
@@ -113,130 +134,8 @@ Resources:
       Email: prod@tu-dominio.com
       ParentIds: 
         - !Ref ProdOU
+      RoleName: OrganizationAccountAccessRole
 
-  # 4. SCPs recomendados (adjuntados al Root o a OUs específicas)
-
-  # SCP 1: Proteger la cuenta Management (Root) - Impide acciones con usuario root
-  ProtectManagementAccountSCP:
-    Type: AWS::Organizations::Policy
-    Properties:
-      Name: Protect-Management-Account
-      Description: Protege la cuenta raíz de acciones peligrosas usando credenciales root
-      Type: SERVICE_CONTROL_POLICY
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: ProtectRootUser
-            Effect: Deny
-            Action: "*"
-            Resource: "*"
-            Condition:
-              StringEquals:
-                aws:PrincipalARN: "arn:aws:iam::${aws:accountId}:root"
-      TargetIds:
-        - !GetAtt Organization.RootId
-
-  # SCP 2 Corregido: Restringir regiones permitiendo servicios globales
-  RestrictRegionsSCP:
-    Type: AWS::Organizations::Policy
-    Properties:
-      Name: Restrict-Regions
-      Description: Permite regiones aprobadas y servicios globales esenciales
-      Type: SERVICE_CONTROL_POLICY
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: DenyUnsupportedRegions
-            Effect: Deny
-            NotAction:
-              # Lista de servicios que NO deben ser bloqueados (servicios globales)
-              - iam:*
-              - organizations:*
-              - route53:*
-              - budgets:*
-              - waf:*
-              - cloudfront:*
-              - globalaccelerator:*
-              - support:*
-              - trustedadvisor:*
-            Resource: "*"
-            Condition:
-              StringNotEquals:
-                aws:RequestedRegion:
-                  - us-east-1
-                  - sa-east-1
-      TargetIds:
-        - !GetAtt Organization.RootId
-
-  # SCP 3: Forzar tagging obligatorio (CostCenter y Environment)
-  RequireTagsSCP:
-    Type: AWS::Organizations::Policy
-    Properties:
-      Name: Require-Tags
-      Description: Obliga a usar tags CostCenter y Environment en recursos clave
-      Type: SERVICE_CONTROL_POLICY
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: RequireCostCenterAndEnvironment
-            Effect: Deny
-            Action:
-              - ec2:RunInstances
-              - s3:CreateBucket
-              - rds:CreateDBInstance
-              - lambda:CreateFunction
-              - dynamodb:CreateTable
-            Resource: "*"
-            Condition:
-              Null:
-                aws:RequestTag/CostCenter: "true"
-                aws:RequestTag/Environment: "true"
-      TargetIds:
-        - !Ref WorkloadsOU   # Solo se aplica a Workloads (puedes cambiarlo)
-
-  # SCP 4: Evitar que las cuentas salgan de la Organization
-  PreventLeavingOrgSCP:
-    Type: AWS::Organizations::Policy
-    Properties:
-      Name: Prevent-Leaving-Organization
-      Description: Impide que las cuentas miembro abandonen la Organization
-      Type: SERVICE_CONTROL_POLICY
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: DenyLeaveOrganization
-            Effect: Deny
-            Action: organizations:LeaveOrganization
-            Resource: "*"
-      TargetIds:
-        - !GetAtt Organization.RootId
-
-  # SCP 5: Denegar recursos caros en Sandbox y Dev (control de costos)
-  DenyExpensiveResourcesSCP:
-    Type: AWS::Organizations::Policy
-    Properties:
-      Name: Deny-Expensive-Resources
-      Description: Bloquea instancias y recursos muy caros en entornos no productivos
-      Type: SERVICE_CONTROL_POLICY
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: DenyHighCostInstances
-            Effect: Deny
-            Action:
-              - ec2:RunInstances
-              - rds:CreateDBInstance
-            Resource: "*"
-            Condition:
-              StringEquals:
-                ec2:InstanceType:
-                  - p3.2xlarge
-                  - g4dn.12xlarge
-                  - m5.24xlarge
-                  - r5.24xlarge
-      TargetIds:
-        - !Ref SandboxOU
-        - !Ref DevOU
 ```
 
 ### 🚀 Cómo desplegarlo
