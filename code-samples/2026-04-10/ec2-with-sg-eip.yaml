@@ -37,6 +37,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Enable SSH access via port 22
+      GroupName: !Sub "${Environment}-SSH-SG"
       VpcId: !Ref VpcId
       SecurityGroupIngress:
         - IpProtocol: tcp
@@ -52,6 +53,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: !Ref SecurityGroupDescription
+      GroupName: !Sub "${Environment}-Server-SG"
       VpcId: !Ref VpcId
       SecurityGroupIngress:
         - IpProtocol: tcp

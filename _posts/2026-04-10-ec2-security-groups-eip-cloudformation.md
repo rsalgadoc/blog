@@ -262,7 +262,7 @@ Puedes encontrar el template completo en mi repositorio:
 ### 🎥 Video Tutorial
 Mira el proceso paso a paso en video:
 
-{% include video.html id="" provider="youtube" %}
+{% include video.html id="NuOohtLHyzU" provider="youtube" %}
 
 ---
 
