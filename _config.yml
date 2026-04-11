@@ -17,7 +17,7 @@ title_separator          : "-"
 subtitle                 : "Rodrigo Salgado"
 name                     : &name "Rodrigo Salgado" # &name is a YAML anchor which can be *referenced later
 description              : &description "A flexible Jekyll theme for your blog or site with a minimalist aesthetic."
-url                      : https://rsalgadoc.github.io/blog/ # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
+url                      : https://rsalgadoc.github.io/ # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "/blog" # the subpath of your site, e.g. "/blog"
 repository               : "blog"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
