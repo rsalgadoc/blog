@@ -126,15 +126,6 @@ aws cloudformation create-stack \
     ParameterKey=SubnetId,ParameterValue=subnet-xxxxx
 ```
 
-**Nota importante**: UserData tarda algunos minutos en ejecutarse. Puedes ver el progreso en:
-
-```shell
-# Conecta por SSH a la instancia y revisa los logs:
-ssh -i tu-clave.pem ec2-user@<IP-ELASTICA>
-
-# Dentro de la instancia:
-tail -f /var/log/cloud-init-output.log
-```
 
 Una vez que Nginx esté corriendo, visita en tu navegador:
 
@@ -155,10 +146,10 @@ Puedes encontrar el template completo en mi repositorio:
 ### 🎥 Video Tutorial
 Mira el proceso paso a paso en video:
 
-{% include video.html id="" provider="youtube" %}
+{% include video.html id="dGZ54AAQT_M" provider="youtube" %}
 
 ---
 
 ### 💡 Próximos pasos
-- Ejecutar un script más complejo (descargar aplicación desde S3, configurar variables de entorno)
+- Ejecutar un script más complejo (Desplegando tu Sitio Web desde GitHub)
 
