@@ -56,7 +56,7 @@ O a través de la consola de CloudFormation en AWS.
 
 ### 📂 Código Adjunto
 Puedes encontrar el template completo y más ejemplos en mi repositorio:
-[Ver archivos en GitHub]({{ site.baseurl }}/code-samples/2026-04-09/just-ec2.yaml)
+[Ver archivo en GitHub]({{ site.baseurl }}/code-samples/2026/04/09-just-ec2.yaml)
 
 ---
 

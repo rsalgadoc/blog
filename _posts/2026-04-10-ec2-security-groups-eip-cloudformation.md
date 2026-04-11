@@ -255,7 +255,7 @@ aws cloudformation create-stack \
 
 ### 📂 Código Adjunto
 Puedes encontrar el template completo en mi repositorio:
-[Ver archivos en GitHub]({{ site.baseurl }}/code-samples/2026-04-10/ec2-with-sg-eip.yaml)
+[Ver archivo en GitHub]({{ site.baseurl }}/code-samples/2026/04/10-ec2-with-sg-eip.yaml)
 
 ---
 
