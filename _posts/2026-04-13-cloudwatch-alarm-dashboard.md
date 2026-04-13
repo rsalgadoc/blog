@@ -101,6 +101,14 @@ Ve a la consola de CloudWatch > Alarms y verás cómo cambia a color rojo.
 Puedes encontrar el template completo con la EC2 + Alarma + Dashboard aquí:
 [Ver archivo en GitHub]({{ site.baseurl }}/code-samples/2026/04/13-cloudwatch-alarm-dashboard.yaml)
 
+---
+
+### 🎥 Video Tutorial
+Mira el proceso paso a paso en video:
+
+{% include video.html id="Ouh9J_Pa2AM" provider="youtube" %}
+
+---
+
 ### 💡 Próximos pasos
 - Enviar una notificación por correo (SNS) cuando la alarma se active.
-- Crear una acción de recuperación automática para que AWS reinicie la instancia si falla el Status Check.
