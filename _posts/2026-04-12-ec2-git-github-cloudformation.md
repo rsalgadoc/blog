@@ -196,11 +196,9 @@ Puedes encontrar el template completo en mi repositorio:
 ### 🎥 Video Tutorial
 Mira el proceso paso a paso en video:
 
-{% include video.html id="" provider="youtube" %}
+{% include video.html id="GFiVYVvvuCA" provider="youtube" %}
 
 ---
 
 ### 💡 Próximos pasos
-- Clonar tu propio repositorio en lugar del ejemplo
-- Agregar más personalizaciones con sed y otros comandos
-- Implementar un webhook para actualizar el sitio cuando cambies el código en GitHub
+- Observabilidad - Alarmas y Dashboards con CloudWatch

@@ -114,7 +114,7 @@ Resources:
   AlarmCPUHigh:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmDescription: "Alerta si el CPU supera el 70% por más de 2 periodos de 5 minutos"
+      AlarmDescription: "Alerta si el CPU supera el 45% por más de 2 periodos de 5 minutos"
       MetricName: CPUUtilization
       Namespace: AWS/EC2
       Statistic: Average
