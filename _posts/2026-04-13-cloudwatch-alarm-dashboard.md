@@ -29,13 +29,13 @@ Agregamos una alerta que vigila si nuestro servidor está bajo mucho estrés:
 AlarmaCPUAlta:
   Type: AWS::CloudWatch::Alarm
   Properties:
-    AlarmDescription: "Alerta si el CPU supera el 70% por más de 2 minutos"
+    AlarmDescription: "Alerta si el CPU supera el 45% por más de 2 minutos"
     MetricName: CPUUtilization
     Namespace: AWS/EC2
     Statistic: Average
     Period: 60 # Segundos
     EvaluationPeriods: 2
-    Threshold: 70
+    Threshold: 45
     ComparisonOperator: GreaterThanThreshold
     Dimensions:
       - Name: InstanceId
