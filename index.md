@@ -12,7 +12,7 @@ title: "☁️ AWS Daily Insights"
 ---
 
 ### 🚀 El Reto: 1 Post al Día
-Cada entrada incluye el **código fuente** (Terraform, Python/Boto3, CloudFormation) para que puedas replicar los laboratorios en tu propia cuenta.
+Cada entrada incluye el **código fuente** (CloudFormation) para que puedas replicar los laboratorios en tu propia cuenta.
 
 #### 🛠️ Lo que encontrarás aquí:
 *   **Serverless:** Profundizando en Lambda, API Gateway y DynamoDB.
