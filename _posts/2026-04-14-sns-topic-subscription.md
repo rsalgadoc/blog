@@ -79,7 +79,7 @@ Puedes encontrar el template completo con la EC2 + Alarma + Dashboard aquí:
 ### 🎥 Video Tutorial
 Mira el proceso paso a paso en video:
 
-{% include video.html id="Ouh9J_Pa2AM" provider="youtube" %}
+{% include video.html id="hivOjNEesso" provider="youtube" %}
 
 ---
 
