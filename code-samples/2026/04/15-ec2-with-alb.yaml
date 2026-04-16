@@ -1,0 +1,235 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: EC2 Instance con Elastic IP y Security Groups en VPC
+
+Parameters:
+  Environment:
+    Description: Entorno (dev, test, prod)
+    Type: String
+    Default: dev
+    AllowedValues: [dev, test, prod]
+
+  SecurityGroupDescription:
+    Description: Descripción del Security Group del servidor
+    Type: String
+    Default: "Security group for the web/application server"
+
+  SSHAllowedCIDR:
+    Description: CIDR desde donde se permite SSH (recomendado restringirlo)
+    Type: String
+    Default: "0.0.0.0/0"   # Cambia esto a tu IP pública /32 en producción
+
+  VpcId:
+    Description: ID de la VPC donde se desplegará la instancia
+    Type: AWS::EC2::VPC::Id
+
+  SubnetId:
+    Description: ID de la Subnet pública donde se lanzará la instancia
+    Type: AWS::EC2::Subnet::Id
+
+  SubnetId2:
+    Description: ID de la segunda Subnet pública donde se lanzará la instancia
+    Type: AWS::EC2::Subnet::Id
+
+  ImageId:
+    Description: AMI ID (Linux)
+    Type: String
+    Default: "ami-0ea87431b78a82070"   # Asegúrate que sea válida en us-east-1
+
+Resources:
+  # Security Group para SSH
+  SSHSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      GroupName: !Sub "${Environment}-SSH-SG"
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref SSHAllowedCIDR
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-SSH-SG"
+
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Permitir trafico HTTP publico hacia el ALB"
+      GroupName: !Sub "${Environment}-ALB-SG"
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0 # El mundo puede entrar al balanceador
+
+  # Security Group para el servidor (HTTP + SSH restringido)
+  ServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Ref SecurityGroupDescription
+      GroupName: !Sub "${Environment}-Server-SG"
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          # 👇 MAGIA: Solo acepta conexiones si vienen del balanceador
+          SourceSecurityGroupId: !Ref ALBSecurityGroup 
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-Server-SG"
+
+  MiTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub "${Environment}-TG"
+      VpcId: !Ref VpcId
+      Protocol: HTTP
+      Port: 80
+      TargetType: instance
+      Targets:
+        - Id: !Ref MyInstance1 # Primera instancia
+        - Id: !Ref MyInstance2 # Segunda instancia
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: /
+      HealthCheckIntervalSeconds: 30
+
+  MiLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub "${Environment}-ALB"
+      Subnets: 
+        - !Ref SubnetId
+        - !Ref SubnetId2 # El ALB requiere al menos 2 subnets en distintas AZ
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      Scheme: internet-facing
+
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref MiLoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref MiTargetGroup
+
+  # Instancia EC2 1
+  MyInstance1:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImageId
+      InstanceType: t3.micro
+      SubnetId: !Ref SubnetId
+      SecurityGroupIds:
+        - !Ref SSHSecurityGroup
+        - !Ref ServerSecurityGroup
+      UserData: !Base64 |
+        #!/bin/bash
+        # Actualizar sistema
+        dnf update -y
+
+        # Instalar Nginx
+        dnf install nginx -y
+
+        # Iniciar y habilitar Nginx
+        systemctl start nginx
+        systemctl enable nginx
+
+        # Instalar git y clonar el repo
+        sudo dnf install git -y
+        git clone https://github.com/rsalgadoc/html5up-photon.git /tmp/mi-sitio
+
+        cd /tmp/mi-sitio
+
+        sed -i "s/<strong>Photon<\/strong>/<strong>MyInstance1 $(hostname -f)<\/strong>/g" index.html
+
+        # Limpiar la carpeta de nginx y mover tus archivos
+        sudo rm -rf /usr/share/nginx/html/*
+        sudo cp -r /tmp/mi-sitio/* /usr/share/nginx/html/
+
+        # Reiniciar Nginx para aplicar cambios
+        systemctl restart nginx
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-MyInstance1"
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 8
+            VolumeType: gp3
+            DeleteOnTermination: true
+
+  # Instancia EC2 2
+  MyInstance2:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImageId
+      InstanceType: t3.micro
+      SubnetId: !Ref SubnetId2
+      SecurityGroupIds:
+        - !Ref SSHSecurityGroup
+        - !Ref ServerSecurityGroup
+      UserData: !Base64 |
+        #!/bin/bash
+        # Actualizar sistema
+        dnf update -y
+
+        # Instalar Nginx
+        dnf install nginx -y
+
+        # Iniciar y habilitar Nginx
+        systemctl start nginx
+        systemctl enable nginx
+
+        # Instalar git y clonar el repo
+        sudo dnf install git -y
+        git clone https://github.com/rsalgadoc/html5up-photon.git /tmp/mi-sitio
+
+        cd /tmp/mi-sitio
+
+        sed -i "s/<strong>Photon<\/strong>/<strong>MyInstance2 $(hostname -f)<\/strong>/g" index.html
+
+        # Limpiar la carpeta de nginx y mover tus archivos
+        sudo rm -rf /usr/share/nginx/html/*
+        sudo cp -r /tmp/mi-sitio/* /usr/share/nginx/html/
+
+        # Reiniciar Nginx para aplicar cambios
+        systemctl restart nginx
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-MyInstance2"
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 8
+            VolumeType: gp3
+            DeleteOnTermination: true
+
+Outputs:
+  InstanceId1:
+    Description: ID de la instancia EC2 1
+    Value: !Ref MyInstance1
+
+  InstanceId2:
+    Description: ID de la instancia EC2 2
+    Value: !Ref MyInstance2
+
+  SSHSecurityGroupId:
+    Description: Security Group ID para SSH
+    Value: !Ref SSHSecurityGroup
+
+  ServerSecurityGroupId:
+    Description: Security Group ID del servidor
+    Value: !Ref ServerSecurityGroup
+
+  URLDelWebsite:
+    Description: "Copia esta URL en tu navegador para ver el balanceador en acción"
+    Value: !Sub "http://${MiLoadBalancer.DNSName}"
+
+  DNSDelALB:
+    Description: "Nombre DNS puro del Balanceador"
+    Value: !GetAtt MiLoadBalancer.DNSName
