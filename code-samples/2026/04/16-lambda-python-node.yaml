@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Función Lambda muy simple que devuelva un mensaje de saludo
+
+Resources:
+  # ==================== ROL IAM ====================
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  # ==================== FUNCIÓN LAMBDA ====================
+  MiPrimeraLambdaPython:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: HolaMundo-Python
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Handler: index.lambda_handler
+      Timeout: 30
+      Code:
+        ZipFile: |
+          def lambda_handler(event, context):
+              print("¡Hola desde AWS Lambda en Python!")
+              return {
+                  'statusCode': 200,
+                  'body': '¡Hola Mundo! Esta es mi primera función Lambda en Python 🚀'
+              }
+
+  MiPrimeraLambdaNode:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: HolaMundo-Node
+      Runtime: nodejs20.x
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Handler: index.handler
+      Timeout: 30
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+              console.log("¡Hola desde AWS Lambda en Node.js!");
+              return {
+                  statusCode: 200,
+                  body: "¡Hola Mundo! Esta es mi primera función Lambda en Node.js 🚀"
+              };
+          };
+
+Outputs:
+  LambdaFunctionNamePython:
+    Value: !Ref MiPrimeraLambdaPython
+
+  LambdaFunctionNameNode:
+    Value: !Ref MiPrimeraLambdaNode
