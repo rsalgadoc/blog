@@ -11,17 +11,6 @@ title: "☁️ AWS Daily Insights"
 
 ---
 
-### 🚀 El Reto: 1 Post al Día
-Cada entrada incluye el **código fuente** (CloudFormation) para que puedas replicar los laboratorios en tu propia cuenta.
-
-#### 🛠️ Lo que encontrarás aquí:
-*   **Serverless:** Profundizando en Lambda, API Gateway y DynamoDB.
-*   **Infraestructura como Código (IaC):** Automatización total con Terraform y CDK.
-*   **Seguridad:** Implementación de IAM, KMS y Shield siguiendo el *Well-Architected Framework*.
-*   **Cost Optimization:** Estrategias para no llevarse sorpresas en la factura de AWS.
-
----
-
 ### 📚 Últimas Publicaciones
 Aquí aparecerán mis posts más recientes. ¡Vuelve mañana para el siguiente!
 
@@ -33,6 +22,17 @@ Aquí aparecerán mis posts más recientes. ¡Vuelve mañana para el siguiente!
     </li>
   {% endfor %}
 </ul>
+
+---
+
+### 🚀 El Reto: 1 Post al Día
+Cada entrada incluye el **código fuente** (CloudFormation) para que puedas replicar los laboratorios en tu propia cuenta.
+
+#### 🛠️ Lo que encontrarás aquí:
+*   **Serverless:** Profundizando en Lambda, API Gateway y DynamoDB.
+*   **Infraestructura como Código (IaC):** Automatización total con Terraform y CDK.
+*   **Seguridad:** Implementación de IAM, KMS y Shield siguiendo el *Well-Architected Framework*.
+*   **Cost Optimization:** Estrategias para no llevarse sorpresas en la factura de AWS.
 
 ---
 

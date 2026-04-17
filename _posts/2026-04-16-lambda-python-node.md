@@ -127,4 +127,4 @@ Mira el proceso paso a paso en video:
 ---
 
 ### 💡 Próximos pasos
-- 
+- Conectando AWS Lambda con Amazon S3: Procesa archivos subidos automáticamente
