@@ -51,65 +51,64 @@ LambdaExecutionRole:
 #### 2. La función Lambda (reutilizamos la del Día 8 - Python)
 
 ```yaml
-MiPrimeraLambdaPython:
-  Type: AWS::Lambda::Function
-  Properties:
-    FunctionName: MiPrimeraAPILambda-Python
-    Runtime: python3.12
-    Role: !GetAtt LambdaExecutionRole.Arn
-    Handler: index.lambda_handler
-    Timeout: 30
-    Code:
-      ZipFile: |
-        import json
+  MiPrimeraLambdaPython:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: MiPrimeraAPILambda-Python
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Handler: index.lambda_handler
+      Timeout: 30
+      Code:
+        ZipFile: |
+          import json
 
-        def lambda_handler(event, context):
-            print("Evento recibido desde API Gateway:", json.dumps(event, indent=2))
-            
-            response_body = {
-                'mensaje': '¡Hola desde mi primera API con Lambda y API Gateway! 🚀',
-                'version': 'Día 10',
-                'timestamp': context.get('aws_request_id'),
-                'method': event.get('requestContext', {}).get('http', {}).get('method', 'UNKNOWN'),
-                'path': event.get('requestContext', {}).get('http', {}).get('path', '/')
-            }
-            
-            return {
-                'statusCode': 200,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'   # Para permitir CORS (útil en desarrollo)
-                },
-                'body': json.dumps(response_body)
-            }
+          def lambda_handler(event, context):
+              print("Evento recibido desde API Gateway:", json.dumps(event, indent=2))
+              
+              response_body = {
+                  'mensaje': '¡Hola desde mi primera API con Lambda y API Gateway! 🚀',
+                  'version': 'Día 10',
+                  'request_id': context.aws_request_id,
+                  'path': event.get('requestContext', {}).get('http', {}).get('path', '/')
+              }
+              
+              return {
+                  'statusCode': 200,
+                  'headers': {
+                      'Content-Type': 'application/json',
+                      'Access-Control-Allow-Origin': '*'   # Para permitir CORS (útil en desarrollo)
+                  },
+                  'body': json.dumps(response_body)
+              }
 ```
 #### 3. API Gateway HTTP + Integración con Lambda
 
 ```yaml
-MiAPI:
-  Type: AWS::ApiGatewayV2::Api
-  Properties:
-    Name: MiPrimeraAPI
-    ProtocolType: HTTP
-    Target: !Sub "arn:aws:lambda:$${AWS::Region}:$${AWS::AccountId}:function:${MiPrimeraLambdaPython}"
+  MiAPI:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: MiPrimeraAPI
+      ProtocolType: HTTP
+      Target: !Sub "arn:aws:lambda:$${AWS::Region}:$${AWS::AccountId}:function:${MiPrimeraLambdaPython}"
 
-MiStage:
-  Type: AWS::ApiGatewayV2::Stage
-  Properties:
-    ApiId: !Ref MiAPI
-    Name: prod
-    AutoDeploy: true
+  MiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref MiAPI
+      StageName: prod
+      AutoDeploy: true
 ```
 #### 4. Permiso para que API Gateway invoque la Lambda
 
 ```yaml
-AllowAPIGatewayToInvokeLambda:
-  Type: AWS::Lambda::Permission
-  Properties:
-    FunctionName: !Ref MiPrimeraLambdaPython
-    Action: lambda:InvokeFunction
-    Principal: apigateway.amazonaws.com
-    SourceArn: !Sub "arn:aws:execute-api:$${AWS::Region}:$${AWS::AccountId}:${MiAPI}/*/*/*"
+  AllowAPIGatewayToInvokeLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref MiPrimeraLambdaPython
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${MiAPI}/*"
 ```
 
 ### 📚 Conceptos Nuevos Explicados
@@ -160,7 +159,7 @@ Puedes encontrar el template completo (rol + Lambda + API Gateway + permisos) aq
 ### 🎥 Video Tutorial
 Mira el proceso paso a paso en video:
 
-{% include video.html id="lD6TuB4khGw" provider="youtube" %}
+{% include video.html id="vJybztw08oE" provider="youtube" %}
 
 ---
 
