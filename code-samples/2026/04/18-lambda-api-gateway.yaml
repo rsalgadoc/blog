@@ -1,0 +1,81 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS Lambda + Amazon API Gateway
+
+Resources:
+  # ==================== ROL IAM ====================
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  # ==================== FUNCIÓN LAMBDA ====================
+  MiPrimeraLambdaPython:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: MiPrimeraAPILambda-Python
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Handler: index.lambda_handler
+      Timeout: 30
+      Code:
+        ZipFile: |
+          import json
+
+          def lambda_handler(event, context):
+              print("Evento recibido desde API Gateway:", json.dumps(event, indent=2))
+              
+              response_body = {
+                  'mensaje': '¡Hola desde mi primera API con Lambda y API Gateway! 🚀',
+                  'version': 'Día 10',
+                  'request_id': context.aws_request_id,
+                  'path': event.get('requestContext', {}).get('http', {}).get('path', '/')
+              }
+              
+              return {
+                  'statusCode': 200,
+                  'headers': {
+                      'Content-Type': 'application/json',
+                      'Access-Control-Allow-Origin': '*'   # Para permitir CORS (útil en desarrollo)
+                  },
+                  'body': json.dumps(response_body)
+              }
+
+
+  MiAPI:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: MiPrimeraAPI
+      ProtocolType: HTTP
+      Target: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${MiPrimeraLambdaPython}"
+
+  MiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref MiAPI
+      StageName: prod
+      AutoDeploy: true
+
+  AllowAPIGatewayToInvokeLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref MiPrimeraLambdaPython
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${MiAPI}/*"
+
+
+Outputs:
+  LambdaFunctionNamePython:
+    Value: !Ref MiPrimeraLambdaPython
+    Description: Nombre de la función Lambda en Python
+  ApiEndpoint:
+    Value: !Sub "https://${MiAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/"
+    Description: URL de la API Gateway para invocar la función Lambda
