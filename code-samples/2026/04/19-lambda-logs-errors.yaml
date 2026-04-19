@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS Lambda + Amazon API Gateway
+
+Resources:
+  # ==================== ROL IAM ====================
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: CloudWatchLogsPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+
+  # ==================== FUNCIÓN LAMBDA ====================
+  MyLambdaWithLogs:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: LambdaWithLogs-Python
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Handler: index.lambda_handler
+      Timeout: 30
+      Code:
+        ZipFile: |
+          import json
+          import logging
+
+          # Configuración básica de logging
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          def lambda_handler(event, context):
+              logger.info("=== Inicio de la función Lambda ===")
+              logger.info(f"Request ID: {context.aws_request_id}")
+              logger.info(f"Evento recibido: {json.dumps(event, default=str)}")
+              
+              try:
+                  # Simulamos posible error para demostración
+                  if "error" in event.get("queryStringParameters", {}):
+                      raise ValueError("Error simulado solicitado por el usuario")
+                  
+                  response_body = {
+                      "mensaje": "¡La función se ejecutó correctamente!",
+                      "version": "Día 11",
+                      "request_id": context.aws_request_id,
+                      "timestamp": context.get_remaining_time_in_millis()
+                  }
+                  
+                  logger.info("Función ejecutada exitosamente")
+                  return {
+                      "statusCode": 200,
+                      "headers": {
+                          "Content-Type": "application/json",
+                          "Access-Control-Allow-Origin": "*"
+                      },
+                      "body": json.dumps(response_body)
+                  }
+                  
+              except Exception as e:
+                  logger.error(f"Error en la función: {str(e)}", exc_info=True)
+                  
+                  return {
+                      "statusCode": 500,
+                      "headers": {
+                          "Content-Type": "application/json",
+                          "Access-Control-Allow-Origin": "*"
+                      },
+                      "body": json.dumps({
+                          "mensaje": "Ocurrió un error interno",
+                          "error": str(e)
+                      })
+                  }
+
+  MiLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: !Sub "/aws/lambda/${MyLambdaWithLogs}"
+        RetentionInDays: 30        # Opciones comunes: 7, 14, 30, 90, 365
+
+Outputs:
+  LambdaFunctionNamePython:
+    Value: !Ref MyLambdaWithLogs
+    Description: Nombre de la función Lambda en Python
+
