@@ -93,7 +93,9 @@ author:
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/rsalgadoc"
-
+    - label: "Web"
+      icon: "fas fa-fw fa-globe"
+      url: "https://rsalgadoc.github.io/"
 
 
 # Site Footer
