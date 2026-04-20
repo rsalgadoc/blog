@@ -56,7 +56,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - secretsmanager:GetSecretValue
-                Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:lambda/api-key-prod*"
+                Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:prod/lambda/api-key*"
 
   # ==================== FUNCIÓN LAMBDA ====================
   MyLambdaWithSecrets:
@@ -71,7 +71,7 @@ Resources:
         Variables:
           ENVIRONMENT: "production"
           LOG_LEVEL: "INFO"
-          SECRET_NAME: "lambda/api-key-prod"   # Nombre del secreto creado manualmente
+          SECRET_NAME: "prod/lambda/api-key"   # Nombre del secreto creado manualmente
       Code:
         ZipFile: |
           import json
@@ -148,7 +148,7 @@ Servicio gestionado para almacenar y rotar secretos de forma segura. Ideal para 
 Solo se da el permiso `secretsmanager:GetSecretValue` sobre el secreto específico (principio de menor privilegio).
 #### 4.  Creación manual del secreto
 Paso previo obligatorio:
-Ve a la consola de **Secrets Manager** → **Store a new secret** → elige "Other type of secret" → agrega una clave `api_key` con tu valor → nómbralo exactamente `lambda/api-key-prod`.
+Ve a la consola de **Secrets Manager** → **Store a new secret** → elige "Other type of secret" → agrega una clave `api_key` con tu valor → nómbralo exactamente `prod/lambda/api-key`.
 #### 5.  Buenas prácticas de seguridad
 
 * Nunca imprimir el valor real del secreto en los logs.
@@ -166,10 +166,8 @@ Cuando modificas las variables de entorno de una función Lambda:
 
 Ejemplo: Si cambias `LOG_LEVEL` de `"INFO"` a `"DEBUG"`, los logs más detallados aparecerán en las invocaciones posteriores.
 
-Este es un <code style="color: orange; background: black;">valor naranja</code>
-
 ### 🚀 Cómo Desplegarlo
-Primero crea el secreto manualmente en Secrets Manager con el nombre `lambda/api-key-prod`.
+Primero crea el secreto manualmente en Secrets Manager con el nombre `prod/lambda/api-key`.
 Luego despliega el stack:
 
 ```shell
@@ -198,10 +196,9 @@ Puedes encontrar el template completo aquí:
 ### 🎥 Video Tutorial
 Mira el proceso paso a paso en video:
 
-{% include video.html id="FKMXd_vJD80" provider="youtube" %}
+{% include video.html id="7cGjYLMrx0Q" provider="youtube" %}
 
 ---
 
 ### 💡 Próximos pasos
-- AWS Lambda con Variables de Entorno y Secrets Manager
-(Configuración segura sin hardcodear credenciales)
+- Programando ejecuciones automáticas con Amazon EventBridge (Cron Jobs en Lambda) (Funciones que se ejecutan según horario)
