@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Lambda programada con Amazon EventBridge (Cron Jobs)
+
+Resources:
+  # ==================== ROL IAM ====================
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  # Rol de IAM que el Scheduler usará para ejecutar la Lambda
+  SchedulerToLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: scheduler.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ExecuteLambdaPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: "lambda:InvokeFunction"
+                Resource: !GetAtt MyScheduledLambda.Arn
+
+  # ==================== FUNCIÓN LAMBDA ====================
+  MyScheduledLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: ScheduledLambda-Python
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Handler: index.lambda_handler
+      Timeout: 60
+      Code:
+        ZipFile: |
+          import json
+          import logging
+          from datetime import datetime
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          def lambda_handler(event, context):
+              logger.info("=== Lambda programada ejecutada por EventBridge ===")
+              logger.info(f"Request ID: {context.aws_request_id}")
+              logger.info(f"Evento recibido: {json.dumps(event, default=str)}")
+              
+              execution_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+              
+              logger.info(f"Ejecución a las: {execution_time}")
+
+              response_body = {
+                  "mensaje": "¡Lambda ejecutada correctamente por EventBridge!",
+                  "version": "Día 13",
+                  "execution_time": execution_time,
+                  "source": event.get("source", "aws.events")
+              }
+              
+              logger.info("Tarea programada completada exitosamente")
+              return {
+                  "statusCode": 200,
+                  "headers": {"Content-Type": "application/json"},
+                  "body": json.dumps(response_body)
+              }
+
+  # ==================== REGLAS DE EVENTBRIDGE ====================
+
+  # Programación para pruebas (cada 5 minutos)
+  TestEvery5MinutesSchedule:
+    Type: AWS::Scheduler::Schedule
+    Properties:
+      Name: Test-Lambda-Every5Minutes
+      Description: Ejecuta cada 5 minutos usando el nuevo Scheduler
+      ScheduleExpression: "rate(5 minutes)"
+      State: ENABLED
+      FlexibleTimeWindow:
+        Mode: "OFF" # Ejecución exacta. Puedes poner "FLEXIBLE" para optimizar costos.
+      Target:
+        Arn: !GetAtt MyScheduledLambda.Arn
+        RoleArn: !GetAtt SchedulerToLambdaRole.Arn
+
+  # Programación diaria (Producción)
+  DailySchedule:
+    Type: AWS::Scheduler::Schedule
+    Properties:
+      Name: Daily-Lambda-At8AM
+      Description: Ejecuta a las 8:00 AM usando zona horaria específica
+      ScheduleExpression: "cron(0 8 * * ? *)"
+      ScheduleExpressionTimezone: "UTC" # ¡Ahora puedes poner "America/Santiago" o similar!
+      State: DISABLED
+      FlexibleTimeWindow:
+        Mode: "OFF"
+      Target:
+        Arn: !GetAtt MyScheduledLambda.Arn
+        RoleArn: !GetAtt SchedulerToLambdaRole.Arn
