@@ -96,6 +96,9 @@ author:
     - label: "Web"
       icon: "fas fa-fw fa-globe"
       url: "https://rsalgadoc.github.io/"
+    - label: "Youtube"
+      icon: "fab fa-fw fa-youtube"
+      url: "https://www.youtube.com/@expertocloud365"
 
 
 # Site Footer
