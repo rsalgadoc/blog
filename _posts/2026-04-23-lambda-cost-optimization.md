@@ -92,7 +92,7 @@ Puedes encontrar el template y el código de la función aquí:
 ### 🎥 Video Tutorial
 Mira el proceso paso a paso en video:
 
-{% include video.html id="0jj7G41XbX4" provider="youtube" %}
+{% include video.html id="mI8y6QMCQ90" provider="youtube" %}
 
 ---
 
