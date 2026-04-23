@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Optimizando costos y rendimiento en AWS Lambda, Memory, Timeout y Concurrency
+
+Resources:
+  # ==================== ROL IAM ====================
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  # ==================== FUNCIÓN LAMBDA ====================
+  LambdaOptimizada:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: HolaMundo-Python
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Handler: index.lambda_handler
+      # --- AJUSTES DE OPTIMIZACIÓN ---
+      MemorySize: 512                 # Más memoria = más CPU
+      Timeout: 10                     # Evita procesos zombis de larga duración
+      ReservedConcurrentExecutions: 5 # No queremos saturar nuestra DB
+      # -------------------------------
+      Code:
+        ZipFile: |
+          import time
+          import json
+
+          def lambda_handler(event, context):
+              start_time = time.time()
+              
+              # Tarea intensiva de CPU: Calcular números primos
+              limit = 50000
+              primes = []
+              for num in range(2, limit):
+                  for i in range(2, int(num**0.5) + 1):
+                      if (num % i) == 0:
+                          break
+                  else:
+                      primes.append(num)
+                      
+              end_time = time.time()
+              duration = end_time - start_time
+              
+              return {
+                  'statusCode': 200,
+                  'body': json.dumps({
+                      'mensaje': f'Calculados {len(primes)} primos',
+                      'tiempo_ejecucion_segundos': f'{duration:.4f}',
+                      'memoria_configurada': f'{context.memory_limit_in_mb} MB'
+                  })
+              }
+
+
+Outputs:
+  LambdaFunctionNamePython:
+    Value: !Ref LambdaOptimizada
