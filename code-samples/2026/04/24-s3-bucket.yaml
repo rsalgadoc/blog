@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Día 16: Creación de un Bucket de S3 con bloqueo de acceso público'
+
+Resources:
+  # Definición del Bucket
+  MiPrimerBucketS3:
+    Type: AWS::S3::Bucket
+    Properties:
+      # El nombre debe ser único globalmente. 
+      # Usamos el Account ID para evitar colisiones.
+      BucketName: !Sub "mi-proyecto-s3-${AWS::AccountId}-${AWS::Region}"
+      
+      # Configuración de seguridad: Bloqueo de acceso público
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      
+      # Etiquetas para organización de recursos
+      Tags:
+        - Key: "Proyecto"
+          Value: "Curso-AWS"
+        - Key: "Dia"
+          Value: "16"
+
+Outputs:
+  BucketARN:
+    Description: "ARN del bucket creado"
+    Value: !GetAtt MiPrimerBucketS3.Arn
+  
+  BucketName:
+    Description: "Nombre del bucket creado"
+    Value: !Ref MiPrimerBucketS3
