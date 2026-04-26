@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Día 16: Creación de un Bucket de S3 StorageClass Intelligent Tiering'
+
+Resources:
+  # Definición del Bucket
+  BucketAhorroAutomatico:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "s3-intelligent-tiering-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+
+      # PASO 1: Mover automáticamente todo lo que se suba a Intelligent-Tiering
+      LifecycleConfiguration:
+        Rules:
+          - Id: "MoverAIntelligentTieringInmediatamente"
+            Status: Enabled
+            Transitions:
+              - StorageClass: INTELLIGENT_TIERING
+                TransitionInDays: 0
+
+      # PASO 2: Configurar qué hace Intelligent-Tiering con el tiempo (Archive)
+      IntelligentTieringConfigurations:
+        - Id: "OptimizacionDeCostosProfunda"
+          Status: Enabled
+          Tierings:
+            - AccessTier: ARCHIVE_ACCESS
+              Days: 90 # Ahorro extremo tras 90 días sin uso
+            - AccessTier: DEEP_ARCHIVE_ACCESS
+              Days: 180 # Costo casi cero tras 180 días sin uso
+      
+      Tags:
+        - Key: "AutoCostOptimize"
+          Value: "True"
+
+Outputs:
+  BucketARN:
+    Description: "ARN del bucket creado"
+    Value: !GetAtt BucketAhorroAutomatico.Arn
+  
+  BucketName:
+    Description: "Nombre del bucket creado"
+    Value: !Ref BucketAhorroAutomatico
