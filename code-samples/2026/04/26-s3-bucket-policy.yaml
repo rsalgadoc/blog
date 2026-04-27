@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Seguridad en S3: Políticas de Bucket y ACLs'
+
+Resources:
+  # Definición del Bucket
+  MiBucketSeguro:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "bucket-seguro-${AWS::AccountId}"
+      
+      # 1. SEGURO MAESTRO: Bloqueo de acceso público total
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+        
+      # 2. MEJOR PRÁCTICA: Desactivar ACLs para usar solo Políticas
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+
+  # 3. POLÍTICA DE BUCKET: Control de acceso fino
+  PoliticaDeAccesoS3:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref MiBucketSeguro
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          # Denegar cualquier conexión que no use HTTPS
+          - Sid: "EnforceHTTPS"
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource: 
+              - !Sub "arn:aws:s3:::${MiBucketSeguro}"
+              - !Sub "arn:aws:s3:::${MiBucketSeguro}/*"
+            Condition:
+              Bool:
+                "aws:SecureTransport": "false"
+
+Outputs:
+  BucketARN:
+    Description: "ARN del bucket creado"
+    Value: !GetAtt MiBucketSeguro.Arn
+  
+  BucketName:
+    Description: "Nombre del bucket creado"
+    Value: !Ref MiBucketSeguro
