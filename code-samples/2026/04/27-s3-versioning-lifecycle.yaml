@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Versionamiento y Ciclo de Vida'
+
+Resources:
+  BucketConHistorial:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "bucket-versionado-${AWS::AccountId}"
+      # 1. Activar el historial de versiones
+      VersioningConfiguration:
+        Status: Enabled
+      
+      # 2. Configurar el ciclo de vida
+      LifecycleConfiguration:
+        Rules:
+          - Id: "LimpiezaDeVersionesAntiguas"
+            Status: Enabled
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 30 # Borra versiones viejas tras 30 días
+          - Id: "BorrarArchivosTemporales"
+            Status: Enabled
+            Prefix: "temp/" # Solo aplica a la carpeta "temp"
+            ExpirationInDays: 7 # Borra el archivo original tras 7 días
+
+Outputs:
+  BucketARN:
+    Description: "ARN del bucket creado"
+    Value: !GetAtt BucketConHistorial.Arn
+  
+  BucketName:
+    Description: "Nombre del bucket creado"
+    Value: !Ref BucketConHistorial
