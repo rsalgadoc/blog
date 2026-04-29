@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Alojamiento de sitios web estáticos en S3'
+
+Resources:
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "mi-web-estatica-${AWS::AccountId}"
+      # Configuramos el archivo principal y el de error
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+      # Para una web pública, quitamos los bloqueos que usamos antes
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  # 2. Permitir que TODO EL MUNDO lea los archivos
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Sub 'arn:aws:s3:::${WebsiteBucket}/*'
+
+Outputs:
+  URLDelSitioWeb:
+    Description: "URL pública de tu sitio web estático"
+    Value: !GetAtt WebsiteBucket.WebsiteURL
+  BucketName:
+    Description: "Nombre del bucket creado"
+    Value: !Ref WebsiteBucket
+
