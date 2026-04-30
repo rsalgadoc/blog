@@ -86,7 +86,7 @@ Puedes descargar el template con las reglas de ciclo de vida aquí:
 
 ### 🎥 Video Tutorial
 
-En este video te muestro cómo el versionamiento puede salvarte de un desastre y cómo configurar las reglas de limpieza para no pagar de más:
+Mira el proceso paso a paso en video:
 
 {% include video.html id="pXakYZ18HtM" provider="youtube" %}
 

@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Cifrado de S3 con AWS KMS'
+
+Resources:
+  MiLlaveMaestra:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: "Llave maestra para el blog - Cifrado S3"
+      Enabled: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "Permitir uso total al administrador"
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: "kms:*"
+            Resource: "*"
+
+  # 2. Creamos el bucket vinculado a esa llave
+  BucketUltraSeguro:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "s3-cifrado-kms-${AWS::AccountId}"
+      # Bloqueo de acceso público (Mejor práctica del Día 18)
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+      # Configuración de cifrado obligatorio
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref MiLlaveMaestra
+
+Outputs:
+  BucketName:
+    Description: "Nombre del bucket creado"
+    Value: !Ref BucketUltraSeguro
+
