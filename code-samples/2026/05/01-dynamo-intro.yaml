@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Tabla de usuarios en DynamoDB'
+
+Resources:
+  MiTablaUsuarios:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "UsuariosApp"
+      # Definimos el esquema de la llave (Partition Key)
+      AttributeDefinitions:
+        - AttributeName: "UserId"
+          AttributeType: "S" # S de String
+      KeySchema:
+        - AttributeName: "UserId"
+          KeyType: "HASH" # HASH es el identificador único
+      # Modo de pago por uso (ideal para empezar)
+      BillingMode: PAY_PER_REQUEST
+      Tags:
+        - Key: "Modulo"
+          Value: "DynamoDB-Intro"
+
+Outputs:
+  TableName:
+    Description: "Nombre de la tabla creada"
+    Value: !Ref MiTablaUsuarios
+

@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Mejores prácticas y optimización de costos en S3'
+
+Resources:
+  BucketProfesional:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "s3-optimizacion-final-${AWS::AccountId}"
+      # 1. Seguridad Total
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      # 2. Control de Costos (Limpieza automática)
+      LifecycleConfiguration:
+        Rules:
+          - Id: "LimpiarUploadsIncompletos"
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+      # 3. Organización (Tags para facturación)
+      Tags:
+        - Key: "Proyecto"
+          Value: "SerieAWS7Dias"
+        - Key: "CostCenter"
+          Value: "Aprendizaje"
+
+Outputs:
+  BucketName:
+    Description: "Nombre del bucket creado"
+    Value: !Ref BucketProfesional
+
