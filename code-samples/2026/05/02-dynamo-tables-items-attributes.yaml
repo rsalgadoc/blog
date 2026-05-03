@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Tablas, Items y Atributos'
+
+Resources:
+  TablaProductos:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "CatalogoProductos"
+      # Definimos solo la llave principal (obligatorio)
+      AttributeDefinitions:
+        - AttributeName: "SKU"
+          AttributeType: "S" # S = String (Texto)
+      KeySchema:
+        - AttributeName: "SKU"
+          KeyType: "HASH"
+      BillingMode: PAY_PER_REQUEST
+
+Outputs:
+  TableName:
+    Description: "Nombre de la tabla creada"
+    Value: !Ref TablaProductos
+
