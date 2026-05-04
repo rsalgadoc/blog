@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Partition Key y Sort Key'
+
+Resources:
+  TablaConEventos:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "RegistroActividad"
+      AttributeDefinitions:
+        - AttributeName: "Id"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "Id"
+          KeyType: "HASH"
+      BillingMode: PAY_PER_REQUEST
+      # ACTIVACIÓN DEL STREAM
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES # Envía el dato antes y después del cambio
+
+Outputs:
+  TableName:
+    Description: "Nombre de la tabla creada"
+    Value: !Ref TablaConEventos

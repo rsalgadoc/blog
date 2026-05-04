@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Partition Key y Sort Key'
+
+Resources:
+  TablaConCapacidad:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "InventarioGlobal"
+      AttributeDefinitions:
+        - AttributeName: "ItemId"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "ItemId"
+          KeyType: "HASH"
+      # Configuramos la potencia reservada
+      BillingMode: PROVISIONED
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5  # Capacidad de lectura
+        WriteCapacityUnits: 5 # Capacidad de escritura
+
+
+Outputs:
+  TableName:
+    Description: "Nombre de la tabla creada"
+    Value: !Ref TablaConCapacidad
+
