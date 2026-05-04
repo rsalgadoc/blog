@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Partition Key y Sort Key'
+
+Resources:
+  TablaPedidos:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "PedidosClientes"
+      AttributeDefinitions:
+        - AttributeName: "CustomerId" # Partition Key
+          AttributeType: "S"
+        - AttributeName: "OrderId"    # Sort Key
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "CustomerId"
+          KeyType: "HASH" # PK
+        - AttributeName: "OrderId"
+          KeyType: "RANGE" # SK
+      BillingMode: PAY_PER_REQUEST
+
+Outputs:
+  TableName:
+    Description: "Nombre de la tabla creada"
+    Value: !Ref TablaPedidos
+

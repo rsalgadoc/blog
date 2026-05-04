@@ -82,9 +82,9 @@ Puedes bajar el template de la tabla de productos aquí:
 
 ### 🎥 Video Tutorial
 
-En el video de hoy comparamos una tabla de Excel con una tabla de DynamoDB para que veas visualmente la diferencia entre filas y elementos:
+Mira el proceso paso a paso en video:
 
-{% include video.html id="VIDEO_ID_DYNAMO_ANATOMY" provider="youtube" %}
+{% include video.html id="BSfdzTG91z0" provider="youtube" %}
 
 ---
 
