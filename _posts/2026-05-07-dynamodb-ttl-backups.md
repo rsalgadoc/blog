@@ -86,7 +86,7 @@ Puedes bajar el template final con seguridad y TTL aquí:
 
 En el video de hoy te enseño cómo recuperar una tabla que fue borrada "accidentalmente" en menos de 5 minutos usando PITR:
 
-{% include video.html id="VIDEO_ID_DYNAMO_BACKUP" provider="youtube" %}
+{% include video.html id="VIDEO_ID_DYNAMO_BACKUP1" provider="youtube" %}
 
 ---
 
